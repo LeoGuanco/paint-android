@@ -98,8 +98,38 @@ public class MainActivity extends AppCompatActivity {
             this.row.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
 
             this.createEraser(context);
+            this.createPencil(context);
+            this.createClean(context);
 
             this.row.addView(this.eraser);
+            this.row.addView(this.pencil);
+            this.row.addView(this.clean);
+        }
+
+        private void createClean(Context context){
+            this.clean = new Button(context);
+            this.clean.setText("Limpiar");
+            this.clean.setWidth(200);
+
+            this.clean.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view){
+                    setClean();
+                }
+            });
+        }
+
+        private void createPencil(Context context){
+            this.pencil = new Button(context);
+            this.pencil.setText("Lapiz");
+            this.pencil.setWidth(200);
+
+            this.pencil.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view){
+                    setPencil();
+                }
+            });
         }
 
         private void createEraser(Context context){
@@ -118,6 +148,19 @@ public class MainActivity extends AppCompatActivity {
         private void setEraser(){
             this.brushPaint.setStrokeWidth(this.finalWidthBrush + 20);
             this.brushPaint.setColor(Color.WHITE);
+        }
+
+        private void setPencil(){
+            this.brushPaint.setStrokeWidth(this.finalWidthBrush);
+            this.brushPaint.setColor(this.finalColor);
+        }
+
+        private void setClean(){
+            this.brushPaint.reset();
+            this.circlePaint.reset();
+            this.canvas.drawColor(Color.WHITE);
+            this.invalidate();
+            this.setPencil();
         }
 
         private void actionDown(float posx, float posy){
@@ -169,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean onTouchEvent(MotionEvent event){
-            this.showMessage("Touch Event");
+            //this.showMessage("Touch Event");
 
             float posx = event.getX();
             float posy = event.getY();
