@@ -27,7 +27,10 @@ public class MainActivity extends AppCompatActivity {
     public class DrawView extends View {
 
         private final int finalWidthCircle = 14;
+        private final int finalWidthBrush = 14;
         private final int finalColor = Color.parseColor("#9FA9DF");
+
+        private float lastPosX,lastPosY;
 
         private Paint circlePaint; //Estilos
         private Path circlePath;   //Figuras geometricas
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         public DrawView(Context context){
             super(context);
             this.createCircle();
+            this.createBrush();
         }
 
         private void createCircle(){
@@ -65,20 +69,32 @@ public class MainActivity extends AppCompatActivity {
             this.brushPaint.setColor(this.finalColor);
             this.brushPaint.setStyle(Paint.Style.STROKE);
             this.brushPaint.setStrokeCap(Paint.Cap.ROUND);
+            this.brushPaint.setStrokeWidth(this.finalWidthBrush);
         }
 
         private void actionDown(float posx, float posy){
+            this.lastPosX = posx;
+            this.lastPosY = posy;
+
             this.circlePath.reset();
-            this.circlePath.addCircle(posx,posy,30,Path.Direction.CCW);
+            this.brushPath.reset();
+
+            this.brushPath.moveTo(lastPosX,lastPosY);
         }
 
         private void actionMove(float posx, float posy){
             this.circlePath.reset();
+
+            this.brushPath.quadTo(this.lastPosX,this.lastPosY,(posx + this.lastPosX)/2,(posy + this.lastPosY)/2);
+            this.lastPosX = posx;
+            this.lastPosY = posy;
+
             this.circlePath.addCircle(posx,posy,30,Path.Direction.CCW);
         }
 
         private void actionUp(){
             this.circlePath.reset();
+            this.brushPath.reset();
         }
 
         private void showMessage(String msg){
@@ -88,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onDraw(Canvas canvas){
             super.onDraw(canvas);
+            canvas.drawPath(this.brushPath,this.brushPaint);
             canvas.drawPath(this.circlePath,this.circlePaint);
         }
 
