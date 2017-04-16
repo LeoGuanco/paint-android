@@ -7,11 +7,17 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import android.widget.LinearLayout.LayoutParams;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,13 +27,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.drawView = new DrawView(this);
+
         setContentView(this.drawView);
+        this.addContentView(this.drawView.row,this.drawView.params);
     }
 
     public class DrawView extends View {
 
         private final int finalWidthCircle = 14;
-        private final int finalWidthBrush = 14;
+        private final int finalWidthBrush = 12;
         private final int finalColor = Color.parseColor("#9FA9DF");
 
         private float lastPosX,lastPosY;
@@ -42,11 +50,22 @@ public class MainActivity extends AppCompatActivity {
         private Bitmap myBitMap;
         private Paint bitMapPaint;
 
+        private LayoutParams params;
+        private LinearLayout row;
+
+        private Button eraser;
+        private Button pencil;
+        private Button clean;
 
         public DrawView(Context context){
             super(context);
+            this.bitMapPaint = new Paint();
             this.createCircle();
             this.createBrush();
+
+            this.createButtons(context);
+
+            this.setBackgroundColor(Color.WHITE);
         }
 
         private void createCircle(){
@@ -72,6 +91,35 @@ public class MainActivity extends AppCompatActivity {
             this.brushPaint.setStrokeWidth(this.finalWidthBrush);
         }
 
+        private void createButtons(Context context){
+            this.params = new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+
+            this.row = new LinearLayout(context);
+            this.row.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
+
+            this.createEraser(context);
+
+            this.row.addView(this.eraser);
+        }
+
+        private void createEraser(Context context){
+            this.eraser = new Button(context);
+            this.eraser.setText("Borrador");
+            this.eraser.setWidth(200);
+
+            this.eraser.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view){
+                    setEraser();
+                }
+            });
+        }
+
+        private void setEraser(){
+            this.brushPaint.setStrokeWidth(this.finalWidthBrush + 20);
+            this.brushPaint.setColor(Color.WHITE);
+        }
+
         private void actionDown(float posx, float posy){
             this.lastPosX = posx;
             this.lastPosY = posy;
@@ -94,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
         private void actionUp(){
             this.circlePath.reset();
+            this.canvas.drawPath(this.brushPath,this.brushPaint);
             this.brushPath.reset();
         }
 
@@ -102,8 +151,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
+        protected void onSizeChanged(int w, int h, int wold, int hold){
+            super.onSizeChanged(w,h,wold,hold);
+
+            this.myBitMap = Bitmap.createBitmap(w,h, Bitmap.Config.ARGB_8888);
+            this.canvas = new Canvas(this.myBitMap);
+        }
+
+        @Override
         protected void onDraw(Canvas canvas){
             super.onDraw(canvas);
+
+            canvas.drawBitmap(this.myBitMap,0,0,this.bitMapPaint);
             canvas.drawPath(this.brushPath,this.brushPaint);
             canvas.drawPath(this.circlePath,this.circlePaint);
         }
